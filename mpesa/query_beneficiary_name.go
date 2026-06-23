@@ -94,14 +94,17 @@ type QueryBeneficiaryNameResponse struct {
 // QueryBeneficiaryName queries KYC name details for a customer.
 //
 // Endpoint:
-//   GET /{sandbox|openapi}/ipg/v2/{market}/queryBeneficiaryName/
+//
+//	GET /{sandbox|openapi}/ipg/v2/{market}/queryBeneficiaryName/
 //
 // Query parameters:
-//   input_CustomerMSISDN, input_Country, input_ServiceProviderCode,
-//   input_ThirdPartyConversationID, input_KycQueryType
+//
+//	input_CustomerMSISDN, input_Country, input_ServiceProviderCode,
+//	input_ThirdPartyConversationID, input_KycQueryType
 //
 // Bearer value:
-//   RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
+//
+//	RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
 func (c *Client) QueryBeneficiaryName(ctx context.Context, sessionID string, request QueryBeneficiaryNameRequest) (*QueryBeneficiaryNameResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

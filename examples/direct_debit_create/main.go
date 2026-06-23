@@ -27,9 +27,9 @@ func main() {
 	}
 
 	req := client.NewDirectDebitCreateRequest(
-		"000000000001",                         // customer MSISDN
-		"000000",                               // service provider shortcode
-		"3333",                                 // mandate reference
+		"000000000001",                          // customer MSISDN
+		"000000",                                // service provider shortcode
+		"3333",                                  // mandate reference
 		"AAA6d1f9391a0052de0b5334a912jbsj1j2kk", // third-party conversation ID
 		mpesa.DirectDebitAgreedTCYes,            // customer agreed to T&C: "1"
 	)

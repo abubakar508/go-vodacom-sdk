@@ -102,10 +102,12 @@ type CancelDirectDebitResponse struct {
 // CancelDirectDebit cancels a Direct Debit mandate.
 //
 // Endpoint:
-//   PUT /{sandbox|openapi}/ipg/v2/{market}/directDebitCancel/
+//
+//	PUT /{sandbox|openapi}/ipg/v2/{market}/directDebitCancel/
 //
 // Bearer value:
-//   RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
+//
+//	RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
 func (c *Client) CancelDirectDebit(ctx context.Context, sessionID string, request CancelDirectDebitRequest) (*CancelDirectDebitResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

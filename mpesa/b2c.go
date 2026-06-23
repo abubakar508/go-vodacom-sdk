@@ -79,10 +79,12 @@ type B2CSingleStageResponse struct {
 // B2CSingleStage performs a Business-to-Customer single stage disbursement.
 //
 // Endpoint:
-//   POST /{sandbox|openapi}/ipg/v2/{market}/b2cPayment/
+//
+//	POST /{sandbox|openapi}/ipg/v2/{market}/b2cPayment/
 //
 // Bearer value:
-//   RSA-encrypted SessionID returned by GenerateSessionKey.
+//
+//	RSA-encrypted SessionID returned by GenerateSessionKey.
 func (c *Client) B2CSingleStage(ctx context.Context, sessionID string, request B2CSingleStageRequest) (*B2CSingleStageResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

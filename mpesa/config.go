@@ -13,11 +13,13 @@ import (
 // Config contains all configuration needed by the SDK.
 //
 // Standard usage is either:
-//   cfg := mpesa.Config{APIKey: "..."}
-//   client, err := mpesa.NewClient(cfg)
+//
+//	cfg := mpesa.Config{APIKey: "..."}
+//	client, err := mpesa.NewClient(cfg)
 //
 // or the functional option style:
-//   client, err := mpesa.NewClientWithOptions(mpesa.WithAPIKey("..."))
+//
+//	client, err := mpesa.NewClientWithOptions(mpesa.WithAPIKey("..."))
 type Config struct {
 	// APIKey is your application API key from the M-Pesa developer portal.
 	// It is used only by GenerateSessionKey. Transaction APIs use SessionID.

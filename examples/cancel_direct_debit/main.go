@@ -27,11 +27,11 @@ func main() {
 	}
 
 	req := client.NewCancelDirectDebitWithMSISDN(
-		"000000000001",                       // customer MSISDN; alternatively use token helper
-		"000000",                             // service provider shortcode
-		"00000000000000000001",              // mandate/third-party reference
+		"000000000001",                           // customer MSISDN; alternatively use token helper
+		"000000",                                 // service provider shortcode
+		"00000000000000000001",                   // mandate/third-party reference
 		"AAA6d1f939c1005v2de053v4912jbasdj1j2kk", // third-party conversation ID
-		"15045",                              // mandate ID, optional but recommended when available
+		"15045",                                  // mandate ID, optional but recommended when available
 	)
 
 	res, raw, err := client.CancelDirectDebitWithSession(ctx, session, req)

@@ -13,10 +13,10 @@ const queryTransactionStatusPath = "queryTransactionStatus/"
 // QueryTransactionStatusRequest contains the URL query parameters for
 // GET /queryTransactionStatus/.
 type QueryTransactionStatusRequest struct {
-	InputQueryReference            string `json:"input_QueryReference"`
-	InputServiceProviderCode       string `json:"input_ServiceProviderCode"`
-	InputThirdPartyConversationID  string `json:"input_ThirdPartyConversationID"`
-	InputCountry                   string `json:"input_Country"`
+	InputQueryReference           string `json:"input_QueryReference"`
+	InputServiceProviderCode      string `json:"input_ServiceProviderCode"`
+	InputThirdPartyConversationID string `json:"input_ThirdPartyConversationID"`
+	InputCountry                  string `json:"input_Country"`
 }
 
 // NewQueryTransactionStatusRequest creates a query request using the client's
@@ -71,14 +71,14 @@ func (r QueryTransactionStatusRequest) values() url.Values {
 // The common response fields are represented here; the raw response is returned
 // alongside this struct if you need to inspect market-specific additions.
 type QueryTransactionStatusResponse struct {
-	OutputConversationID             string `json:"output_ConversationID,omitempty"`
-	OutputOriginalConversationID     string `json:"output_OriginalConversationID,omitempty"`
-	OutputResponseCode               string `json:"output_ResponseCode"`
-	OutputResponseDesc               string `json:"output_ResponseDesc"`
-	OutputTransactionID              string `json:"output_TransactionID,omitempty"`
-	OutputTransactionStatus          string `json:"output_TransactionStatus,omitempty"`
-	OutputResponseTransactionStatus  string `json:"output_ResponseTransactionStatus,omitempty"`
-	OutputThirdPartyConversationID   string `json:"output_ThirdPartyConversationID,omitempty"`
+	OutputConversationID            string `json:"output_ConversationID,omitempty"`
+	OutputOriginalConversationID    string `json:"output_OriginalConversationID,omitempty"`
+	OutputResponseCode              string `json:"output_ResponseCode"`
+	OutputResponseDesc              string `json:"output_ResponseDesc"`
+	OutputTransactionID             string `json:"output_TransactionID,omitempty"`
+	OutputTransactionStatus         string `json:"output_TransactionStatus,omitempty"`
+	OutputResponseTransactionStatus string `json:"output_ResponseTransactionStatus,omitempty"`
+	OutputThirdPartyConversationID  string `json:"output_ThirdPartyConversationID,omitempty"`
 }
 
 // TransactionStatus returns the status regardless of which documented market
@@ -90,14 +90,17 @@ func (r QueryTransactionStatusResponse) TransactionStatus() string {
 // QueryTransactionStatus queries the status of a previous M-Pesa transaction.
 //
 // Endpoint:
-//   GET /{sandbox|openapi}/ipg/v2/{market}/queryTransactionStatus/
+//
+//	GET /{sandbox|openapi}/ipg/v2/{market}/queryTransactionStatus/
 //
 // Query parameters:
-//   input_QueryReference, input_ServiceProviderCode,
-//   input_ThirdPartyConversationID, input_Country
+//
+//	input_QueryReference, input_ServiceProviderCode,
+//	input_ThirdPartyConversationID, input_Country
 //
 // Bearer value:
-//   RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
+//
+//	RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
 func (c *Client) QueryTransactionStatus(ctx context.Context, sessionID string, request QueryTransactionStatusRequest) (*QueryTransactionStatusResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

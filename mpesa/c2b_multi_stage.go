@@ -84,10 +84,12 @@ type C2BMultiStageResponse struct {
 // C2BMultiStage initiates a Customer-to-Business multi-stage payment.
 //
 // Endpoint:
-//   POST /{sandbox|openapi}/ipg/v2/{market}/c2bPayment/multiStage/
+//
+//	POST /{sandbox|openapi}/ipg/v2/{market}/c2bPayment/multiStage/
 //
 // Bearer value:
-//   RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
+//
+//	RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
 func (c *Client) C2BMultiStage(ctx context.Context, sessionID string, request C2BMultiStageRequest) (*C2BMultiStageResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

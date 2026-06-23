@@ -91,10 +91,12 @@ type B2BSingleStageResponse struct {
 // B2BSingleStage performs a Business-to-Business single stage transfer.
 //
 // Endpoint:
-//   POST /{sandbox|openapi}/ipg/v2/{market}/b2bPayment/
+//
+//	POST /{sandbox|openapi}/ipg/v2/{market}/b2bPayment/
 //
 // Bearer value:
-//   RSA-encrypted SessionID returned by GenerateSessionKey.
+//
+//	RSA-encrypted SessionID returned by GenerateSessionKey.
 func (c *Client) B2BSingleStage(ctx context.Context, sessionID string, request B2BSingleStageRequest) (*B2BSingleStageResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

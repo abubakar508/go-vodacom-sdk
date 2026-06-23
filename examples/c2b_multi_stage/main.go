@@ -28,9 +28,9 @@ func main() {
 
 	req := client.NewC2BMultiStageRequest(
 		"10",
-		"000000000001",                      // customer MSISDN
-		"000000",                            // service provider shortcode
-		"T1234C",                            // transaction reference, max 20 chars
+		"000000000001",                     // customer MSISDN
+		"000000",                           // service provider shortcode
+		"T1234C",                           // transaction reference, max 20 chars
 		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
 		"Shoes",
 	)
