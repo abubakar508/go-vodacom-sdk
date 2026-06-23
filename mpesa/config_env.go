@@ -23,16 +23,15 @@ const (
 // DefaultConfig for values that are not provided.
 //
 // Supported variables:
-//
-//	MPESA_API_KEY
-//	MPESA_PUBLIC_KEY
-//	MPESA_ENVIRONMENT=sandbox|openapi
-//	MPESA_MARKET=vodacomDRC|vodafoneGHA|vodacomTZN|vodacomLES|vodacomMOZ
-//	MPESA_COUNTRY=DRC|GHA|TZN|LES|MOZ        // optional custom market override
-//	MPESA_CURRENCY=USD|GHS|TZS|LSL|MZN       // optional custom market override
-//	MPESA_ORIGIN
-//	MPESA_HOST
-//	MPESA_PORT
+//   MPESA_API_KEY
+//   MPESA_PUBLIC_KEY
+//   MPESA_ENVIRONMENT=sandbox|openapi
+//   MPESA_MARKET=vodacomDRC|vodafoneGHA|vodacomTZN|vodacomLES|vodacomMOZ
+//   MPESA_COUNTRY=DRC|GHA|TZN|LES|MOZ        // optional custom market override
+//   MPESA_CURRENCY=USD|GHS|TZS|LSL|MZN       // optional custom market override
+//   MPESA_ORIGIN
+//   MPESA_HOST
+//   MPESA_PORT
 func ConfigFromEnv() (Config, error) {
 	return ConfigFromEnvWithClient(nil)
 }

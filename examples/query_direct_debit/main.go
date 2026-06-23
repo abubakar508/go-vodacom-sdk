@@ -28,12 +28,12 @@ func main() {
 
 	req := client.NewQueryDirectDebitWithMSISDN(
 		mpesa.QueryBalanceAmountTrue, // query balance sufficiency
-		"100",                        // balance amount; required when QueryBalanceAmount is True
-		"255744553111",               // customer MSISDN; alternatively use token helper
-		"112244",                     // service provider shortcode
-		"GPO3051656128",              // third-party conversation ID
-		"Test123",                    // mandate/third-party reference
-		"15045",                      // mandate ID, optional but recommended when available
+		"100",                       // balance amount; required when QueryBalanceAmount is True
+		"255744553111",              // customer MSISDN; alternatively use token helper
+		"112244",                    // service provider shortcode
+		"GPO3051656128",             // third-party conversation ID
+		"Test123",                   // mandate/third-party reference
+		"15045",                     // mandate ID, optional but recommended when available
 	)
 
 	res, raw, err := client.QueryDirectDebitWithSession(ctx, session, req)

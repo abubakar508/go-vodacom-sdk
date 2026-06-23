@@ -27,8 +27,8 @@ func main() {
 	}
 
 	req := client.NewQueryBeneficiaryNameRequest(
-		"254707161122",                     // customer MSISDN
-		"000000",                           // service provider shortcode
+		"254707161122",                      // customer MSISDN
+		"000000",                            // service provider shortcode
 		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
 	)
 	// req.InputKycQueryType defaults to "Name".

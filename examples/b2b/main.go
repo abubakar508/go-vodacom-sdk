@@ -28,9 +28,9 @@ func main() {
 
 	req := client.NewB2BSingleStageRequest(
 		"10",
-		"000000",                           // primary party shortcode: debited organization
-		"000001",                           // receiver party shortcode: credited organization
-		"T1234C",                           // transaction reference, max 20 chars
+		"000000",                            // primary party shortcode: debited organization
+		"000001",                            // receiver party shortcode: credited organization
+		"T1234C",                            // transaction reference, max 20 chars
 		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
 		"Shoes",
 	)

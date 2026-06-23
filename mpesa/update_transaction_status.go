@@ -97,12 +97,10 @@ type UpdateTransactionStatusResponse struct {
 // UpdateTransactionStatus commits or uncommits a transaction.
 //
 // Endpoint:
-//
-//	PUT /{sandbox|openapi}/ipg/v2/{market}/updateTransactionStatus/
+//   PUT /{sandbox|openapi}/ipg/v2/{market}/updateTransactionStatus/
 //
 // Bearer value:
-//
-//	RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
+//   RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
 func (c *Client) UpdateTransactionStatus(ctx context.Context, sessionID string, request UpdateTransactionStatusRequest) (*UpdateTransactionStatusResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

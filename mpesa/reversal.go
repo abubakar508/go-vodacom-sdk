@@ -15,11 +15,11 @@ const reversalPath = "reversal/"
 // reversed is identified by input_TransactionID, and the amount being reversed
 // is sent as input_ReversalAmount.
 type ReversalRequest struct {
-	InputReversalAmount           string `json:"input_ReversalAmount"`
-	InputCountry                  string `json:"input_Country"`
-	InputServiceProviderCode      string `json:"input_ServiceProviderCode"`
-	InputThirdPartyConversationID string `json:"input_ThirdPartyConversationID"`
-	InputTransactionID            string `json:"input_TransactionID"`
+	InputReversalAmount            string `json:"input_ReversalAmount"`
+	InputCountry                   string `json:"input_Country"`
+	InputServiceProviderCode       string `json:"input_ServiceProviderCode"`
+	InputThirdPartyConversationID  string `json:"input_ThirdPartyConversationID"`
+	InputTransactionID             string `json:"input_TransactionID"`
 }
 
 // NewReversalRequest creates a reversal request using the client's configured
@@ -81,12 +81,10 @@ type ReversalResponse struct {
 // Reversal performs a transaction reversal.
 //
 // Endpoint:
-//
-//	POST /{sandbox|openapi}/ipg/v2/{market}/reversal/
+//   POST /{sandbox|openapi}/ipg/v2/{market}/reversal/
 //
 // Bearer value:
-//
-//	RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
+//   RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
 func (c *Client) Reversal(ctx context.Context, sessionID string, request ReversalRequest) (*ReversalResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

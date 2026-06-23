@@ -27,11 +27,11 @@ func main() {
 	}
 
 	req := client.NewUpdateTransactionStatusRequest(
-		mpesa.TransactionStatusCommit,      // "1" commit, "0" uncommit
-		"TGS813",                           // voucher code
-		"000000",                           // service provider shortcode
-		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
-		"0000000000001",                    // transaction ID
+		mpesa.TransactionStatusCommit,          // "1" commit, "0" uncommit
+		"TGS813",                              // voucher code
+		"000000",                              // service provider shortcode
+		"asv02e5958774f7ba228d83d0d689761",   // third-party conversation ID
+		"0000000000001",                       // transaction ID
 	)
 	// req.InputAPIVersion defaults to "3.1".
 

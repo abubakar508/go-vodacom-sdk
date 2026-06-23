@@ -158,12 +158,10 @@ type DirectDebitCreateResponse struct {
 // DirectDebitCreate creates a Direct Debit mandate.
 //
 // Endpoint:
-//
-//	POST /{sandbox|openapi}/ipg/v2/{market}/directDebitCreation/
+//   POST /{sandbox|openapi}/ipg/v2/{market}/directDebitCreation/
 //
 // Bearer value:
-//
-//	RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
+//   RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
 func (c *Client) DirectDebitCreate(ctx context.Context, sessionID string, request DirectDebitCreateRequest) (*DirectDebitCreateResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C2B Tester · Go Vodacom M-Pesa SDK</title>
+  <style>
+    body { margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif; color:#221; background:linear-gradient(135deg,#fff,#fff2f2); }
+    .wrap { max-width:900px; margin:0 auto; padding:56px 22px; }
+    .card { background:#fff; border:1px solid #ffd0d0; border-radius:28px; padding:28px; box-shadow:0 24px 70px rgba(120,0,0,.14); }
+    h1 { font-size:clamp(38px,6vw,70px); letter-spacing:-.06em; line-height:.95; margin:0 0 18px; }
+    span { color:#e60000; }
+    p, li { color:#6d6262; line-height:1.65; }
+    code, pre { background:#241b1b; color:#ffecec; border-radius:14px; padding:3px 7px; }
+    pre { padding:18px; overflow:auto; }
+    a.btn { display:inline-flex; margin-top:18px; background:#e60000; color:white; text-decoration:none; padding:14px 18px; border-radius:16px; font-weight:900; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>Local <span>C2B Tester</span></h1>
+      <p>The real tester must run locally because API keys should not be entered into a public GitHub Pages page and browsers cannot reliably set the M-Pesa <code>Origin</code> header manually.</p>
+      <p>Run this from your cloned repo:</p>
+      <pre>go run ./examples/c2b_tester</pre>
+      <p>Then open:</p>
+      <pre>http://localhost:8088</pre>
+      <ul>
+        <li>Origin header defaults to <code>*</code>.</li>
+        <li>You can enter your API key and platform public key.</li>
+        <li>It generates a SessionID and performs only C2B Single Stage.</li>
+        <li>Credentials are not stored by the tester.</li>
+      </ul>
+      <a class="btn" href="c2b-tester.md">Read tester guide</a>
+    </section>
+  </main>
+</body>
+</html>

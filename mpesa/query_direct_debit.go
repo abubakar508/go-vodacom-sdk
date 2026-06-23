@@ -22,16 +22,16 @@ const (
 // supplied, M-Pesa requires them to match the same customer. If
 // InputQueryBalanceAmount is "True", InputBalanceAmount must be supplied.
 type QueryDirectDebitRequest struct {
-	InputQueryBalanceAmount       string `json:"input_QueryBalanceAmount"`
-	InputBalanceAmount            string `json:"input_BalanceAmount,omitempty"`
-	InputCountry                  string `json:"input_Country"`
-	InputCustomerMSISDN           string `json:"input_CustomerMSISDN,omitempty"`
-	InputMsisdnToken              string `json:"input_MsisdnToken,omitempty"`
-	InputServiceProviderCode      string `json:"input_ServiceProviderCode"`
+	InputQueryBalanceAmount      string `json:"input_QueryBalanceAmount"`
+	InputBalanceAmount           string `json:"input_BalanceAmount,omitempty"`
+	InputCountry                 string `json:"input_Country"`
+	InputCustomerMSISDN          string `json:"input_CustomerMSISDN,omitempty"`
+	InputMsisdnToken             string `json:"input_MsisdnToken,omitempty"`
+	InputServiceProviderCode     string `json:"input_ServiceProviderCode"`
 	InputThirdPartyConversationID string `json:"input_ThirdPartyConversationID"`
-	InputThirdPartyReference      string `json:"input_ThirdPartyReference"`
-	InputMandateID                string `json:"input_MandateID,omitempty"`
-	InputCurrency                 string `json:"input_Currency"`
+	InputThirdPartyReference     string `json:"input_ThirdPartyReference"`
+	InputMandateID               string `json:"input_MandateID,omitempty"`
+	InputCurrency                string `json:"input_Currency"`
 }
 
 // NewQueryDirectDebitRequest creates a Query Direct Debit request using the
@@ -67,12 +67,12 @@ func (c *Client) NewQueryDirectDebitWithToken(queryBalanceAmount, balanceAmount,
 // regex and business validations server-side.
 func (r QueryDirectDebitRequest) Validate() error {
 	required := map[string]string{
-		"input_QueryBalanceAmount":       r.InputQueryBalanceAmount,
-		"input_Country":                  r.InputCountry,
-		"input_ServiceProviderCode":      r.InputServiceProviderCode,
+		"input_QueryBalanceAmount":      r.InputQueryBalanceAmount,
+		"input_Country":                 r.InputCountry,
+		"input_ServiceProviderCode":     r.InputServiceProviderCode,
 		"input_ThirdPartyConversationID": r.InputThirdPartyConversationID,
-		"input_ThirdPartyReference":      r.InputThirdPartyReference,
-		"input_Currency":                 r.InputCurrency,
+		"input_ThirdPartyReference":     r.InputThirdPartyReference,
+		"input_Currency":                r.InputCurrency,
 	}
 	for name, value := range required {
 		if strings.TrimSpace(value) == "" {
@@ -161,12 +161,10 @@ type QueryDirectDebitResponse struct {
 // checks customer balance sufficiency against an amount.
 //
 // Endpoint:
-//
-//	GET /{sandbox|openapi}/ipg/v2/{market}/queryDirectDebit/
+//   GET /{sandbox|openapi}/ipg/v2/{market}/queryDirectDebit/
 //
 // Bearer value:
-//
-//	RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
+//   RSA-encrypted SessionID returned by GenerateSessionKey/GenerateSession.
 func (c *Client) QueryDirectDebit(ctx context.Context, sessionID string, request QueryDirectDebitRequest) (*QueryDirectDebitResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
 		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")
