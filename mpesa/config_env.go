@@ -12,6 +12,8 @@ const (
 	EnvPublicKey   = "MPESA_PUBLIC_KEY"
 	EnvEnvironment = "MPESA_ENVIRONMENT"
 	EnvMarket      = "MPESA_MARKET"
+	EnvCountry     = "MPESA_COUNTRY"
+	EnvCurrency    = "MPESA_CURRENCY"
 	EnvOrigin      = "MPESA_ORIGIN"
 	EnvHost        = "MPESA_HOST"
 	EnvPort        = "MPESA_PORT"
@@ -25,6 +27,8 @@ const (
 //   MPESA_PUBLIC_KEY
 //   MPESA_ENVIRONMENT=sandbox|openapi
 //   MPESA_MARKET=vodacomDRC|vodafoneGHA|vodacomTZN|vodacomLES|vodacomMOZ
+//   MPESA_COUNTRY=DRC|GHA|TZN|LES|MOZ        // optional custom market override
+//   MPESA_CURRENCY=USD|GHS|TZS|LSL|MZN       // optional custom market override
 //   MPESA_ORIGIN
 //   MPESA_HOST
 //   MPESA_PORT
@@ -40,7 +44,7 @@ func ConfigFromEnvWithClient(httpClient *http.Client) (Config, error) {
 		cfg.APIKey = value
 	}
 	if value := os.Getenv(EnvEnvironment); value != "" {
-		cfg.Environment = Environment(strings.ToLower(value))
+		cfg.Environment = Environment(strings.ToLower(strings.TrimSpace(value)))
 		// Re-select default key for that environment unless MPESA_PUBLIC_KEY overrides below.
 		cfg.PublicKey = defaultPublicKeyForEnvironment(cfg.Environment)
 	}
@@ -48,11 +52,20 @@ func ConfigFromEnvWithClient(httpClient *http.Client) (Config, error) {
 		cfg.PublicKey = value
 	}
 	if value := os.Getenv(EnvMarket); value != "" {
-		if market, ok := Markets[value]; ok {
+		if market, ok := MarketFromContext(value); ok {
 			cfg.Market = market
 		} else {
-			cfg.Market = Market{Context: value}
+			cfg.Market = Market{Context: strings.TrimSpace(value)}
 		}
+	}
+	if value := os.Getenv(EnvCountry); value != "" {
+		cfg.Market.Country = strings.ToUpper(strings.TrimSpace(value))
+	}
+	if value := os.Getenv(EnvCurrency); value != "" {
+		cfg.Currency = strings.ToUpper(strings.TrimSpace(value))
+	}
+	if cfg.Market.Description == "" && cfg.Market.Context != "" {
+		cfg.Market.Description = cfg.Market.Context
 	}
 	if value := os.Getenv(EnvOrigin); value != "" {
 		cfg.Origin = value

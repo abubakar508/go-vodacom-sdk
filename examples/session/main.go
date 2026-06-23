@@ -19,7 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	res, raw, err := client.GenerateSessionKey(context.Background())
+	session, raw, err := client.GenerateSession(context.Background())
 	if err != nil {
 		if raw != nil {
 			log.Printf("raw response: %s", raw.BodyString())
@@ -28,7 +28,7 @@ func main() {
 	}
 
 	fmt.Println("HTTP:", raw.StatusCode)
-	fmt.Println("Code:", res.OutputResponseCode)
-	fmt.Println("Desc:", res.OutputResponseDesc)
-	fmt.Println("SessionID:", res.OutputSessionID)
+	fmt.Println("SessionID:", session.ID)
+	fmt.Println("Market:", session.Market.Context, session.Market.Country, session.Market.Currency)
+	fmt.Println("Environment:", session.Environment)
 }

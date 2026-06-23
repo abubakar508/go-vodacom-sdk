@@ -35,6 +35,15 @@ func (c *Client) Config() Config {
 	return c.cfg
 }
 
+func (c *Client) country() string { return c.cfg.Market.Country }
+
+func (c *Client) currency() string {
+	if c.cfg.Currency != "" {
+		return c.cfg.Currency
+	}
+	return c.cfg.Market.Currency
+}
+
 // EncryptBearerValue encrypts an API key or SessionID exactly as required by
 // M-Pesa OpenAPI Authorization Bearer headers.
 func EncryptBearerValue(value, publicKey string) (string, error) {
@@ -42,16 +51,32 @@ func EncryptBearerValue(value, publicKey string) (string, error) {
 }
 
 func (c *Client) endpoint(apiPath string) string {
+	return c.endpointWithQuery(apiPath, nil)
+}
+
+func (c *Client) endpointWithQuery(apiPath string, query url.Values) string {
 	host := c.cfg.Host
 	if c.cfg.Port != 0 && c.cfg.Port != 443 {
 		host = net.JoinHostPort(c.cfg.Host, fmt.Sprintf("%d", c.cfg.Port))
 	}
 
 	path := fmt.Sprintf("/%s/ipg/v2/%s/%s", c.cfg.Environment.BasePath(), c.cfg.Market.Context, strings.TrimLeft(apiPath, "/"))
-	return (&url.URL{Scheme: "https", Host: host, Path: path}).String()
+	u := &url.URL{Scheme: "https", Host: host, Path: path}
+	if len(query) > 0 {
+		u.RawQuery = query.Encode()
+	}
+	return u.String()
 }
 
 func (c *Client) do(ctx context.Context, method, apiPath, bearerValue string, payload any, out any) (*RawResponse, error) {
+	return c.doWithQuery(ctx, method, apiPath, nil, bearerValue, payload, out)
+}
+
+func (c *Client) doQuery(ctx context.Context, method, apiPath string, query url.Values, bearerValue string, out any) (*RawResponse, error) {
+	return c.doWithQuery(ctx, method, apiPath, query, bearerValue, nil, out)
+}
+
+func (c *Client) doWithQuery(ctx context.Context, method, apiPath string, query url.Values, bearerValue string, payload any, out any) (*RawResponse, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -73,7 +98,7 @@ func (c *Client) do(ctx context.Context, method, apiPath, bearerValue string, pa
 		body = bytes.NewReader(data)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, method, c.endpoint(apiPath), body)
+	req, err := http.NewRequestWithContext(ctx, method, c.endpointWithQuery(apiPath, query), body)
 	if err != nil {
 		return nil, err
 	}
@@ -114,11 +139,16 @@ func (c *Client) do(ctx context.Context, method, apiPath, bearerValue string, pa
 
 	code := firstNonEmpty(envelope.OutputResponseCode, envelope.InputResultCode)
 	desc := firstNonEmpty(envelope.OutputResponseDesc, envelope.InputResultDesc)
-	if code != "" && code != "INS-0" && code != "0" {
+	if code != "" && !isSuccessResponseCode(code) {
 		return raw, &APIError{StatusCode: resp.StatusCode, ResponseCode: code, Description: desc, Body: string(respBody)}
 	}
 
 	return raw, nil
+}
+
+func isSuccessResponseCode(code string) bool {
+	code = strings.TrimSpace(code)
+	return code == "0" || code == "INS-0" || strings.HasSuffix(code, "-0")
 }
 
 func firstNonEmpty(values ...string) string {

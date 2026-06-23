@@ -26,16 +26,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	req := client.NewB2CSingleStageRequest(
-		"10",
-		"000000000001",                      // customer MSISDN to credit
-		"000000",                            // service provider shortcode
-		"T1234C",                            // transaction reference, max 20 chars
+	req := client.NewQueryTransactionStatusRequest(
+		"000000000000000000001",            // query reference / transaction or conversation reference
+		"000000",                           // service provider shortcode
 		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
-		"Salary payment",
 	)
 
-	res, raw, err := client.B2CSingleStageWithSession(ctx, session, req)
+	res, raw, err := client.QueryTransactionStatusWithSession(ctx, session, req)
 	if err != nil {
 		if raw != nil {
 			log.Printf("raw response: %s", raw.BodyString())
@@ -48,5 +45,6 @@ func main() {
 	fmt.Println("Desc:", res.OutputResponseDesc)
 	fmt.Println("ConversationID:", res.OutputConversationID)
 	fmt.Println("TransactionID:", res.OutputTransactionID)
+	fmt.Println("TransactionStatus:", res.TransactionStatus())
 	fmt.Println("ThirdPartyConversationID:", res.OutputThirdPartyConversationID)
 }

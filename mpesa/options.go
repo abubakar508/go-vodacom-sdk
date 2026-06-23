@@ -32,6 +32,26 @@ func WithMarket(market Market) Option {
 	return func(c *Config) { c.Market = market }
 }
 
+// WithMarketContext configures a built-in market using its URL context value,
+// e.g. vodacomDRC, vodafoneGHA, vodacomTZN, vodacomLES, or vodacomMOZ.
+// Unknown context values are set as custom context only; for custom markets,
+// prefer WithMarket(CustomMarket(...)) so country and currency are provided.
+func WithMarketContext(context string) Option {
+	return func(c *Config) {
+		if market, ok := MarketFromContext(context); ok {
+			c.Market = market
+			return
+		}
+		c.Market = Market{Context: context}
+	}
+}
+
+// WithCurrency overrides the configured market's default request currency.
+// For example, use WithCurrency("CDF") for DRC CDF flows when enabled in the portal.
+func WithCurrency(currency string) Option {
+	return func(c *Config) { c.Currency = currency }
+}
+
 func WithOrigin(origin string) Option {
 	return func(c *Config) { c.Origin = origin }
 }

@@ -26,16 +26,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	req := client.NewB2CSingleStageRequest(
-		"10",
-		"000000000001",                      // customer MSISDN to credit
-		"000000",                            // service provider shortcode
-		"T1234C",                            // transaction reference, max 20 chars
-		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
-		"Salary payment",
+	req := client.NewUpdateTransactionStatusRequest(
+		mpesa.TransactionStatusCommit,          // "1" commit, "0" uncommit
+		"TGS813",                              // voucher code
+		"000000",                              // service provider shortcode
+		"asv02e5958774f7ba228d83d0d689761",   // third-party conversation ID
+		"0000000000001",                       // transaction ID
 	)
+	// req.InputAPIVersion defaults to "3.1".
 
-	res, raw, err := client.B2CSingleStageWithSession(ctx, session, req)
+	res, raw, err := client.UpdateTransactionStatusWithSession(ctx, session, req)
 	if err != nil {
 		if raw != nil {
 			log.Printf("raw response: %s", raw.BodyString())

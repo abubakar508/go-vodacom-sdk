@@ -26,16 +26,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	req := client.NewB2CSingleStageRequest(
-		"10",
-		"000000000001",                      // customer MSISDN to credit
-		"000000",                            // service provider shortcode
-		"T1234C",                            // transaction reference, max 20 chars
+	req := client.NewReversalRequest(
+		"25",                               // reversal amount
+		"000000",                           // service provider shortcode
 		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
-		"Salary payment",
+		"0000000000001",                    // original M-Pesa transaction ID
 	)
 
-	res, raw, err := client.B2CSingleStageWithSession(ctx, session, req)
+	res, raw, err := client.ReversalWithSession(ctx, session, req)
 	if err != nil {
 		if raw != nil {
 			log.Printf("raw response: %s", raw.BodyString())

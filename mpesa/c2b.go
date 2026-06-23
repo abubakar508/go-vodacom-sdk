@@ -27,8 +27,8 @@ func (c *Client) NewC2BSingleStageRequest(amount, customerMSISDN, serviceProvide
 	return C2BSingleStageRequest{
 		InputAmount:                   amount,
 		InputCustomerMSISDN:           customerMSISDN,
-		InputCountry:                  c.cfg.Market.Country,
-		InputCurrency:                 c.cfg.Market.Currency,
+		InputCountry:                  c.country(),
+		InputCurrency:                 c.currency(),
 		InputServiceProviderCode:      serviceProviderCode,
 		InputTransactionReference:     transactionReference,
 		InputThirdPartyConversationID: thirdPartyConversationID,
@@ -54,6 +54,12 @@ func (r C2BSingleStageRequest) Validate() error {
 			return errors.New(name + " is required")
 		}
 	}
+	if err := validateCommonTransactionFields(r.InputAmount, r.InputCountry, r.InputCurrency, r.InputServiceProviderCode, r.InputTransactionReference, r.InputThirdPartyConversationID); err != nil {
+		return err
+	}
+	if err := validateMSISDN("input_CustomerMSISDN", r.InputCustomerMSISDN); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -76,7 +82,7 @@ type C2BSingleStageResponse struct {
 //   RSA-encrypted SessionID returned by GenerateSessionKey.
 func (c *Client) C2BSingleStage(ctx context.Context, sessionID string, request C2BSingleStageRequest) (*C2BSingleStageResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
-		return nil, nil, errors.New("sessionID is required")
+		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")
 	}
 	if err := request.Validate(); err != nil {
 		return nil, nil, err
@@ -88,4 +94,12 @@ func (c *Client) C2BSingleStage(ctx context.Context, sessionID string, request C
 		return nil, raw, err
 	}
 	return &decoded, raw, nil
+}
+
+// C2BSingleStageWithSession performs C2B using a Session returned by GenerateSession.
+func (c *Client) C2BSingleStageWithSession(ctx context.Context, session *Session, request C2BSingleStageRequest) (*C2BSingleStageResponse, *RawResponse, error) {
+	if session == nil || !session.Valid() {
+		return nil, nil, errors.New("valid session is required; call GenerateSession first")
+	}
+	return c.C2BSingleStage(ctx, session.ID, request)
 }

@@ -34,6 +34,11 @@ type Config struct {
 	// Defaults to Vodacom DRC.
 	Market Market
 
+	// Currency optionally overrides the market default currency for requests.
+	// This is useful for markets such as DRC where the portal may allow multiple
+	// currencies, e.g. USD and CDF.
+	Currency string
+
 	// Origin should match the origin configured on the M-Pesa application.
 	// Defaults to "*" to match the official examples.
 	Origin string
@@ -73,6 +78,7 @@ func (c Config) normalize() Config {
 	if strings.TrimSpace(c.PublicKey) == "" {
 		c.PublicKey = defaultPublicKeyForEnvironment(c.Environment)
 	}
+	c.Currency = strings.ToUpper(strings.TrimSpace(c.Currency))
 	if strings.TrimSpace(c.Origin) == "" {
 		c.Origin = defaults.Origin
 	}
@@ -95,6 +101,11 @@ func (c Config) validate() error {
 	}
 	if !c.Market.valid() {
 		return errors.New("market context, country, and currency are required")
+	}
+	if c.Currency != "" {
+		if err := validateCurrency("currency override", c.Currency); err != nil {
+			return err
+		}
 	}
 	if c.Port < 0 || c.Port > 65535 {
 		return fmt.Errorf("invalid port %d", c.Port)

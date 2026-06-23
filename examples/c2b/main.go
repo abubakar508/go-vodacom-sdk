@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/abubakar508/go-vodacom-sdk/mpesa"
 )
@@ -22,14 +21,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	session, _, err := client.GenerateSessionKey(ctx)
+	// Generates a session using MPESA_API_KEY and waits the default 30 seconds
+	// recommended by the official examples before using it on transaction APIs.
+	session, _, err := client.GenerateSessionAndWait(ctx, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Official examples warn that a new SessionID can take up to 30 seconds
-	// to become usable by transaction APIs.
-	time.Sleep(30 * time.Second)
 
 	req := client.NewC2BSingleStageRequest(
 		"10",
@@ -40,7 +37,7 @@ func main() {
 		"Shoes",
 	)
 
-	res, raw, err := client.C2BSingleStage(ctx, session.OutputSessionID, req)
+	res, raw, err := client.C2BSingleStageWithSession(ctx, session, req)
 	if err != nil {
 		if raw != nil {
 			log.Printf("raw response: %s", raw.BodyString())

@@ -26,16 +26,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	req := client.NewB2CSingleStageRequest(
+	req := client.NewC2BMultiStageRequest(
 		"10",
-		"000000000001",                      // customer MSISDN to credit
+		"000000000001",                      // customer MSISDN
 		"000000",                            // service provider shortcode
 		"T1234C",                            // transaction reference, max 20 chars
 		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
-		"Salary payment",
+		"Shoes",
 	)
+	// req.InputAPIVersion defaults to "3.1".
 
-	res, raw, err := client.B2CSingleStageWithSession(ctx, session, req)
+	res, raw, err := client.C2BMultiStageWithSession(ctx, session, req)
 	if err != nil {
 		if raw != nil {
 			log.Printf("raw response: %s", raw.BodyString())

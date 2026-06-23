@@ -1,71 +1,33 @@
 # go-vodacom-sdk
 
-A Go SDK for Vodacom/Vodafone M-Pesa OpenAPI, focused first on **Vodacom DRC** and organized for adding the remaining OpenAPI endpoints cleanly.
+A production-ready Go SDK for the Vodacom/Vodafone M-Pesa OpenAPI.
 
-Module:
-
-```text
-github.com/abubakar508/go-vodacom-sdk
+```go
+import "github.com/abubakar508/go-vodacom-sdk/mpesa"
 ```
 
-Go directive:
+> Go directive: `go 1.26.1`
 
-```text
-go 1.26.1
-```
+## What is included
 
-## Current support
-
-- Generate SessionKey
-- C2B Single Stage
+- Session generation and bearer encryption
+- C2B Single Stage and C2B Multi Stage
 - B2C Single Stage
 - B2B Single Stage
-- Sandbox and live/OpenAPI environments
-- Vodacom DRC defaults: `vodacomDRC`, `DRC`, `USD`
-- Other documented markets available as constants
-- Standard config styles:
-  - `mpesa.Config{...}`
-  - `mpesa.DefaultConfig()`
-  - `mpesa.NewClientWithOptions(...)`
-  - `mpesa.ConfigFromEnv()`
-- RSA PKCS#1 v1.5 bearer encryption compatible with the official PHP `openssl_public_encrypt` flow
-
-## Folder structure
-
-```text
-.
-├── go.mod
-├── .env.example
-├── README.md
-├── internal/
-│   └── crypto/
-│       └── rsa.go              # internal RSA/public-key encryption helpers
-├── mpesa/                      # public SDK package
-│   ├── callbacks.go            # async callback helpers
-│   ├── c2b.go                  # C2B Single Stage
-│   ├── b2c.go                  # B2C Single Stage
-│   ├── b2b.go                  # B2B Single Stage
-│   ├── client.go               # HTTP client and request execution
-│   ├── client_test.go
-│   ├── config.go               # Config, defaults, validation
-│   ├── config_env.go           # environment variable config
-│   ├── environment.go          # sandbox/openapi environments
-│   ├── errors.go               # typed API errors
-│   ├── keys.go                 # sandbox/live public keys
-│   ├── market.go               # supported markets
-│   ├── options.go              # functional options
-│   ├── response.go             # raw response wrapper
-│   └── session.go              # Generate SessionKey
-└── examples/
-    ├── c2b/
-    │   └── main.go
-    ├── b2c/
-    │   └── main.go
-    ├── b2b/
-    │   └── main.go
-    └── session/
-        └── main.go
-```
+- Reversal
+- Query Transaction Status
+- Update Transaction Status
+- Direct Debit Create
+- Direct Debit Payment
+- Query Beneficiary Name
+- Query Direct Debit
+- Cancel Direct Debit
+- Async callback structs and acknowledgement helpers
+- Request validation helpers
+- Typed API errors and error-code helpers
+- Configurable public key and currency override
+- Examples for every endpoint
+- GitHub Pages documentation site in `/docs`
 
 ## Install
 
@@ -73,77 +35,13 @@ go 1.26.1
 go get github.com/abubakar508/go-vodacom-sdk
 ```
 
-Import the public package:
-
-```go
-import "github.com/abubakar508/go-vodacom-sdk/mpesa"
-```
-
-## Configuration options
-
-### 1. Direct config
-
-```go
-client, err := mpesa.NewClient(mpesa.Config{
-    APIKey:      "your-application-api-key",
-    Environment: mpesa.EnvironmentSandbox,
-    Market:      mpesa.MarketDRC,
-    Origin:      "*",
-})
-```
-
-### 2. Functional options
-
-```go
-client, err := mpesa.NewClientWithOptions(
-    mpesa.WithAPIKey("your-application-api-key"),
-    mpesa.WithEnvironment(mpesa.EnvironmentSandbox),
-    mpesa.WithMarket(mpesa.MarketDRC),
-    mpesa.WithOrigin("*"),
-)
-```
-
-### 3. Environment variables
-
-Copy `.env.example` and set:
-
-```bash
-export MPESA_API_KEY="your-application-api-key"
-export MPESA_ENVIRONMENT="sandbox" # or openapi
-export MPESA_MARKET="vodacomDRC"
-export MPESA_ORIGIN="*"
-```
-
-Then:
-
-```go
-cfg, err := mpesa.ConfigFromEnv()
-if err != nil {
-    log.Fatal(err)
-}
-client, err := mpesa.NewClient(cfg)
-```
-
-Supported environment variables:
-
-| Variable | Description |
-|---|---|
-| `MPESA_API_KEY` | Application API key from the developer portal |
-| `MPESA_PUBLIC_KEY` | Optional override for platform public key |
-| `MPESA_ENVIRONMENT` | `sandbox` or `openapi` |
-| `MPESA_MARKET` | `vodacomDRC`, `vodafoneGHA`, `vodacomTZN`, `vodacomLES`, `vodacomMOZ` |
-| `MPESA_ORIGIN` | Origin header configured in your portal app |
-| `MPESA_HOST` | Defaults to `openapi.m-pesa.com` |
-| `MPESA_PORT` | Defaults to `443` |
-
-## Generate SessionKey
+## Quick start
 
 ```go
 package main
 
 import (
     "context"
-    "fmt"
     "log"
     "os"
 
@@ -151,363 +49,151 @@ import (
 )
 
 func main() {
+    ctx := context.Background()
+
     client, err := mpesa.NewClient(mpesa.Config{
         APIKey:      os.Getenv("MPESA_API_KEY"),
+        PublicKey:   os.Getenv("MPESA_PUBLIC_KEY"), // optional override
         Environment: mpesa.EnvironmentSandbox,
-        Market:      mpesa.MarketDRC,
+        Market:      mpesa.MarketGhana,
         Origin:      "*",
     })
     if err != nil {
         log.Fatal(err)
     }
 
-    session, raw, err := client.GenerateSessionKey(context.Background())
+    session, _, err := client.GenerateSessionAndWait(ctx, 0)
     if err != nil {
-        if raw != nil {
-            log.Printf("raw response: %s", raw.BodyString())
-        }
         log.Fatal(err)
     }
 
-    fmt.Println(session.OutputResponseCode)
-    fmt.Println(session.OutputResponseDesc)
-    fmt.Println(session.OutputSessionID)
-}
-```
+    req := client.NewC2BSingleStageRequest(
+        "10",
+        "000000000001",
+        "000000",
+        "T1234C",
+        "asv02e5958774f7ba228d83d0d689761",
+        "Shoes",
+    )
 
-Endpoint generated for DRC sandbox:
-
-```text
-GET https://openapi.m-pesa.com/sandbox/ipg/v2/vodacomDRC/getSession/
-```
-
-Endpoint generated for DRC live/OpenAPI:
-
-```text
-GET https://openapi.m-pesa.com/openapi/ipg/v2/vodacomDRC/getSession/
-```
-
-Successful response shape:
-
-```json
-{
-  "output_ResponseCode": "INS-0",
-  "output_ResponseDesc": "Request processed successfully",
-  "output_SessionID": "ed0ff3b37d5145f38885e3212aef9774"
-}
-```
-
-## C2B Single Stage
-
-```go
-ctx := context.Background()
-
-session, _, err := client.GenerateSessionKey(ctx)
-if err != nil {
-    log.Fatal(err)
-}
-
-// Official examples warn that a new SessionID can take up to 30 seconds
-// to become active before transaction APIs accept it.
-time.Sleep(30 * time.Second)
-
-req := client.NewC2BSingleStageRequest(
-    "10",
-    "000000000001",
-    "000000",
-    "T1234C",
-    "asv02e5958774f7ba228d83d0d689761",
-    "Shoes",
-)
-
-res, raw, err := client.C2BSingleStage(ctx, session.OutputSessionID, req)
-if err != nil {
-    if raw != nil {
-        log.Println(raw.BodyString())
+    res, raw, err := client.C2BSingleStageWithSession(ctx, session, req)
+    _ = res
+    _ = raw
+    if err != nil {
+        log.Fatal(err)
     }
-    log.Fatal(err)
-}
-
-fmt.Println(res.OutputResponseCode)
-fmt.Println(res.OutputConversationID)
-fmt.Println(res.OutputTransactionID)
-```
-
-Endpoint generated for DRC sandbox:
-
-```text
-POST https://openapi.m-pesa.com/sandbox/ipg/v2/vodacomDRC/c2bPayment/singleStage/
-```
-
-For Vodacom DRC, `NewC2BSingleStageRequest` automatically fills:
-
-```json
-{
-  "input_Country": "DRC",
-  "input_Currency": "USD"
 }
 ```
 
-Successful sync response shape:
-
-```json
-{
-  "output_ConversationID": "d3502e5958774f7ba228d83d0d689761",
-  "output_ResponseCode": "INS-0",
-  "output_ResponseDesc": "Request processed successfully",
-  "output_TransactionID": "49XCD123F6",
-  "output_ThirdPartyConversationID": "asv02e5958774f7ba228d83d0d689761"
-}
-```
-
-## B2C Single Stage
-
-B2C Single Stage is used for business-to-customer disbursements such as salary payments, business payouts, and charity payouts. It uses the SessionID from `GenerateSessionKey` as the encrypted bearer value.
-
-```go
-ctx := context.Background()
-
-session, _, err := client.GenerateSessionKey(ctx)
-if err != nil {
-    log.Fatal(err)
-}
-
-// Official examples warn that a new SessionID can take up to 30 seconds
-// to become active before transaction APIs accept it.
-time.Sleep(30 * time.Second)
-
-req := client.NewB2CSingleStageRequest(
-    "10",
-    "000000000001",
-    "000000",
-    "T1234C",
-    "asv02e5958774f7ba228d83d0d689761",
-    "Salary payment",
-)
-
-res, raw, err := client.B2CSingleStage(ctx, session.OutputSessionID, req)
-if err != nil {
-    if raw != nil {
-        log.Println(raw.BodyString())
-    }
-    log.Fatal(err)
-}
-
-fmt.Println(res.OutputResponseCode)
-fmt.Println(res.OutputConversationID)
-fmt.Println(res.OutputTransactionID)
-```
-
-Endpoint generated for DRC sandbox:
-
-```text
-POST https://openapi.m-pesa.com/sandbox/ipg/v2/vodacomDRC/b2cPayment/
-```
-
-Endpoint generated for DRC live/OpenAPI:
-
-```text
-POST https://openapi.m-pesa.com/openapi/ipg/v2/vodacomDRC/b2cPayment/
-```
-
-For Vodacom DRC, `NewB2CSingleStageRequest` automatically fills:
-
-```json
-{
-  "input_Country": "DRC",
-  "input_Currency": "USD"
-}
-```
-
-Full B2C request shape:
-
-```json
-{
-  "input_Amount": "10",
-  "input_Country": "DRC",
-  "input_Currency": "USD",
-  "input_CustomerMSISDN": "000000000001",
-  "input_ServiceProviderCode": "000000",
-  "input_ThirdPartyConversationID": "asv02e5958774f7ba228d83d0d689761",
-  "input_TransactionReference": "T1234C",
-  "input_PaymentItemsDesc": "Salary payment"
-}
-```
-
-Successful sync response shape:
-
-```json
-{
-  "output_ConversationID": "d3502e5958774f7ba228d83d0d689761",
-  "output_ResponseCode": "INS-0",
-  "output_ResponseDesc": "Request processed successfully",
-  "output_TransactionID": "49XCD123F6",
-  "output_ThirdPartyConversationID": "asv02e5958774f7ba228d83d0d689761"
-}
-```
-
-## B2B Single Stage
-
-B2B Single Stage is used for business-to-business transfers such as stock purchases, bill payments, and ad-hoc payments. It uses the SessionID from `GenerateSessionKey` as the encrypted bearer value.
-
-```go
-ctx := context.Background()
-
-session, _, err := client.GenerateSessionKey(ctx)
-if err != nil {
-    log.Fatal(err)
-}
-
-// Official examples warn that a new SessionID can take up to 30 seconds
-// to become active before transaction APIs accept it.
-time.Sleep(30 * time.Second)
-
-req := client.NewB2BSingleStageRequest(
-    "10",
-    "000000",
-    "000001",
-    "T1234C",
-    "asv02e5958774f7ba228d83d0d689761",
-    "Shoes",
-)
-
-res, raw, err := client.B2BSingleStage(ctx, session.OutputSessionID, req)
-if err != nil {
-    if raw != nil {
-        log.Println(raw.BodyString())
-    }
-    log.Fatal(err)
-}
-
-fmt.Println(res.OutputResponseCode)
-fmt.Println(res.OutputConversationID)
-fmt.Println(res.OutputTransactionID)
-```
-
-Endpoint generated for DRC sandbox:
-
-```text
-POST https://openapi.m-pesa.com/sandbox/ipg/v2/vodacomDRC/b2bPayment/
-```
-
-Endpoint generated for DRC live/OpenAPI:
-
-```text
-POST https://openapi.m-pesa.com/openapi/ipg/v2/vodacomDRC/b2bPayment/
-```
-
-For Vodacom DRC, `NewB2BSingleStageRequest` automatically fills:
-
-```json
-{
-  "input_Country": "DRC",
-  "input_Currency": "USD"
-}
-```
-
-Full B2B request shape:
-
-```json
-{
-  "input_Amount": "10",
-  "input_Country": "DRC",
-  "input_Currency": "USD",
-  "input_PrimaryPartyCode": "000000",
-  "input_ReceiverPartyCode": "000001",
-  "input_ThirdPartyConversationID": "asv02e5958774f7ba228d83d0d689761",
-  "input_TransactionReference": "T1234C",
-  "input_PurchasedItemsDesc": "Shoes"
-}
-```
-
-Successful sync response shape:
-
-```json
-{
-  "output_ConversationID": "d3502e5958774f7ba228d83d0d689761",
-  "output_ResponseCode": "INS-0",
-  "output_ResponseDesc": "Request processed successfully",
-  "output_TransactionID": "49XCD123F6",
-  "output_ThirdPartyConversationID": "asv02e5958774f7ba228d83d0d689761"
-}
-```
-
-Initial async accepted response shape:
-
-```json
-{
-  "output_ResponseCode": "INS-0",
-  "output_ResponseDesc": "Successfully Accepted Request",
-  "output_ConversationID": "d3502e5958774f7ba228d83d0d689761",
-  "output_ThirdPartyConversationID": "asv02e5958774f7ba228d83d0d689761"
-}
-```
-
-## Markets
-
-```go
-mpesa.MarketDRC        // vodacomDRC / DRC / USD
-mpesa.MarketGhana      // vodafoneGHA / GHA / GHS
-mpesa.MarketTanzania   // vodacomTZN / TZN / TZS
-mpesa.MarketLesotho    // vodacomLES / LES / LSL
-mpesa.MarketMozambique // vodacomMOZ / MOZ / MZN
-```
-
-## Async callback acknowledgement
-
-C2B and B2C async callbacks use the same payload shape, so the SDK provides generic and API-specific helpers:
-
-```go
-c2bAck := mpesa.AcceptC2BAsyncCallback(c2bCallback)
-b2cAck := mpesa.AcceptB2CAsyncCallback(b2cCallback)
-b2bAck := mpesa.AcceptB2BAsyncCallback(b2bCallback)
-// or:
-ack := mpesa.AcceptAsyncTransactionCallback(callback)
-```
-
-This returns the expected success acknowledgement:
-
-```json
-{
-  "output_ResponseCode": "0",
-  "output_ResponseDesc": "Successfully Accepted Result"
-}
-```
-
-## Run examples
+## Environment configuration
 
 ```bash
-export MPESA_API_KEY="your-api-key"
-export MPESA_ENVIRONMENT="sandbox"
-export MPESA_MARKET="vodacomDRC"
+export MPESA_API_KEY="your-application-api-key"
+export MPESA_ENVIRONMENT="sandbox" # sandbox or openapi
+export MPESA_MARKET="vodafoneGHA"
 export MPESA_ORIGIN="*"
 
-go run ./examples/session
-# go run ./examples/c2b
-# go run ./examples/b2c
-# go run ./examples/b2b
+# Recommended when the portal publishes/rotates keys:
+export MPESA_PUBLIC_KEY="base64-platform-public-key-from-portal"
+
+# Optional currency override, e.g. DRC CDF:
+export MPESA_CURRENCY="CDF"
 ```
 
-## Test
+Then:
+
+```go
+cfg, err := mpesa.ConfigFromEnv()
+client, err := mpesa.NewClient(cfg)
+```
+
+## Supported markets
+
+| Constant | Context | Country | Default currency |
+|---|---:|---:|---:|
+| `mpesa.MarketGhana` | `vodafoneGHA` | `GHA` | `GHS` |
+| `mpesa.MarketTanzania` | `vodacomTZN` | `TZN` | `TZS` |
+| `mpesa.MarketLesotho` | `vodacomLES` | `LES` | `LSL` |
+| `mpesa.MarketDRC` | `vodacomDRC` | `DRC` | `USD` |
+| `mpesa.MarketMozambique` | `vodacomMOZ` | `MOZ` | `MZN` |
+
+Use `mpesa.WithCurrency("CDF")` or `MPESA_CURRENCY=CDF` if your portal product supports another currency.
+
+## Session flow
+
+All transaction/query APIs require a generated SessionID:
+
+```go
+session, _, err := client.GenerateSessionAndWait(ctx, 0)
+res, raw, err := client.B2CSingleStageWithSession(ctx, session, req)
+```
+
+The default wait is 30 seconds because official examples warn that fresh SessionIDs can take time to become active.
+
+## Error handling
+
+```go
+res, raw, err := client.C2BSingleStageWithSession(ctx, session, req)
+if err != nil {
+    if mpesa.IsDuplicate(err) {
+        // handle duplicate transaction
+    }
+    if raw != nil {
+        log.Println(raw.BodyString())
+    }
+    log.Fatal(err)
+}
+_ = res
+```
+
+## Callback handlers
+
+```go
+mux.Handle("/callbacks/c2b", mpesa.C2BCallbackHandler(func(r *http.Request, cb mpesa.C2BAsyncCallbackRequest) error {
+    // persist callback and update business state
+    return nil
+}))
+```
+
+## Examples
 
 ```bash
-go test ./...
+go run ./examples/session
+go run ./examples/c2b
+go run ./examples/c2b_multi_stage
+go run ./examples/b2c
+go run ./examples/b2b
+go run ./examples/reversal
+go run ./examples/query_transaction_status
+go run ./examples/update_transaction_status
+go run ./examples/direct_debit_create
+go run ./examples/direct_debit_payment
+go run ./examples/query_beneficiary_name
+go run ./examples/query_direct_debit
+go run ./examples/cancel_direct_debit
+go run ./examples/callback_listener
 ```
 
-Note: I could not run tests inside the current workspace because the sandbox does not have the `go` command installed.
+## Documentation
 
-## Next endpoint folders/files
+- [Authentication](docs/authentication.md)
+- [Markets](docs/markets.md)
+- [Endpoints](docs/endpoints.md)
+- [Callbacks](docs/callbacks.md)
+- [Validation and errors](docs/validation-and-errors.md)
+- [GitHub Pages deployment](docs/github-pages-deployment.md)
+- Static landing page: [`docs/index.html`](docs/index.html)
 
-The `mpesa` package is ready for additional endpoint files:
+## Development
 
-```text
-mpesa/reversal.go
-mpesa/query_transaction_status.go
-mpesa/c2b_multi_stage.go
-mpesa/update_transaction_status.go
-mpesa/direct_debit_create.go
-mpesa/direct_debit_payment.go
-mpesa/query_beneficiary_name.go
-mpesa/query_direct_debit.go
-mpesa/cancel_direct_debit.go
+```bash
+gofmt -w .
+go vet ./...
+go test -race ./...
 ```
+
+A GitHub Actions workflow is included in `.github/workflows/ci.yml`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

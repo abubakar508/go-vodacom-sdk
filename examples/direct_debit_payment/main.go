@@ -26,16 +26,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	req := client.NewB2CSingleStageRequest(
-		"10",
-		"000000000001",                      // customer MSISDN to credit
-		"000000",                            // service provider shortcode
-		"T1234C",                            // transaction reference, max 20 chars
-		"asv02e5958774f7ba228d83d0d689761", // third-party conversation ID
-		"Salary payment",
+	req := client.NewDirectDebitPaymentWithMSISDN(
+		"10",                                  // amount
+		"000000000001",                        // customer MSISDN; alternatively use token helper
+		"000000",                              // service provider shortcode
+		"5db410b459bd433ca8e5",                // mandate/third-party reference
+		"AAA6d1f939c1005v2de053v4912jbasdj1j2kk", // third-party conversation ID
+		"15045",                               // mandate ID, optional but recommended when available
 	)
 
-	res, raw, err := client.B2CSingleStageWithSession(ctx, session, req)
+	res, raw, err := client.DirectDebitPaymentWithSession(ctx, session, req)
 	if err != nil {
 		if raw != nil {
 			log.Printf("raw response: %s", raw.BodyString())
@@ -47,6 +47,8 @@ func main() {
 	fmt.Println("Code:", res.OutputResponseCode)
 	fmt.Println("Desc:", res.OutputResponseDesc)
 	fmt.Println("ConversationID:", res.OutputConversationID)
-	fmt.Println("TransactionID:", res.OutputTransactionID)
 	fmt.Println("ThirdPartyConversationID:", res.OutputThirdPartyConversationID)
+	fmt.Println("TransactionReference:", res.OutputTransactionReference)
+	fmt.Println("TransactionID:", res.OutputTransactionID)
+	fmt.Println("MsisdnToken:", res.OutputMsisdnToken)
 }

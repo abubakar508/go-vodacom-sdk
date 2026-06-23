@@ -30,8 +30,8 @@ func (c *Client) NewB2BSingleStageRequest(amount, primaryPartyCode, receiverPart
 	return B2BSingleStageRequest{
 		InputAmount:                   amount,
 		InputReceiverPartyCode:        receiverPartyCode,
-		InputCountry:                  c.cfg.Market.Country,
-		InputCurrency:                 c.cfg.Market.Currency,
+		InputCountry:                  c.country(),
+		InputCurrency:                 c.currency(),
 		InputPrimaryPartyCode:         primaryPartyCode,
 		InputTransactionReference:     transactionReference,
 		InputThirdPartyConversationID: thirdPartyConversationID,
@@ -57,6 +57,24 @@ func (r B2BSingleStageRequest) Validate() error {
 			return errors.New(name + " is required")
 		}
 	}
+	if err := validateAmount("input_Amount", r.InputAmount); err != nil {
+		return err
+	}
+	if err := validateCurrency("input_Currency", r.InputCurrency); err != nil {
+		return err
+	}
+	if err := validateShortCode("input_PrimaryPartyCode", r.InputPrimaryPartyCode); err != nil {
+		return err
+	}
+	if err := validateShortCode("input_ReceiverPartyCode", r.InputReceiverPartyCode); err != nil {
+		return err
+	}
+	if err := validateTransactionReference("input_TransactionReference", r.InputTransactionReference); err != nil {
+		return err
+	}
+	if err := validateThirdPartyConversationID("input_ThirdPartyConversationID", r.InputThirdPartyConversationID); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -79,7 +97,7 @@ type B2BSingleStageResponse struct {
 //   RSA-encrypted SessionID returned by GenerateSessionKey.
 func (c *Client) B2BSingleStage(ctx context.Context, sessionID string, request B2BSingleStageRequest) (*B2BSingleStageResponse, *RawResponse, error) {
 	if strings.TrimSpace(sessionID) == "" {
-		return nil, nil, errors.New("sessionID is required")
+		return nil, nil, errors.New("sessionID is required; call GenerateSessionKey or GenerateSession first")
 	}
 	if err := request.Validate(); err != nil {
 		return nil, nil, err
@@ -91,4 +109,12 @@ func (c *Client) B2BSingleStage(ctx context.Context, sessionID string, request B
 		return nil, raw, err
 	}
 	return &decoded, raw, nil
+}
+
+// B2BSingleStageWithSession performs B2B using a Session returned by GenerateSession.
+func (c *Client) B2BSingleStageWithSession(ctx context.Context, session *Session, request B2BSingleStageRequest) (*B2BSingleStageResponse, *RawResponse, error) {
+	if session == nil || !session.Valid() {
+		return nil, nil, errors.New("valid session is required; call GenerateSession first")
+	}
+	return c.B2BSingleStage(ctx, session.ID, request)
 }

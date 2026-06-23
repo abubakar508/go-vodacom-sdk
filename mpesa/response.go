@@ -1,6 +1,9 @@
 package mpesa
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 // RawResponse contains raw HTTP response data returned alongside decoded payloads.
 type RawResponse struct {
@@ -14,6 +17,19 @@ func (r *RawResponse) BodyString() string {
 		return ""
 	}
 	return string(r.Body)
+}
+
+// JSONMap decodes the raw response body into a generic map. Use this when a
+// market returns fields that are not yet represented by a typed SDK response.
+func (r *RawResponse) JSONMap() (map[string]any, error) {
+	if r == nil {
+		return nil, nil
+	}
+	var out map[string]any
+	if err := json.Unmarshal(r.Body, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 type responseEnvelope struct {
